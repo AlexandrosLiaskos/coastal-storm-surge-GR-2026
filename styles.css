@@ -1096,6 +1096,38 @@ body.sidebar-collapsed .rail-btn:hover {
     gap: 1rem;
 }
 
+.status-bar-legend {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.7rem;
+    color: #1e1e1e;
+}
+
+.legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.legend-dot.natura {
+    background: #7a1212;
+    border: 1.5px solid #ff8f8f;
+}
+
+.legend-dot.standard {
+    background: #000000;
+    border: 1.5px solid #aaaaaa;
+    margin-left: 0.6rem;
+}
+
+.legend-text {
+    color: #000000;
+    font-size: 0.7rem;
+    white-space: nowrap;
+}
+
 .status-bar-right {
     display: flex;
     align-items: center;
