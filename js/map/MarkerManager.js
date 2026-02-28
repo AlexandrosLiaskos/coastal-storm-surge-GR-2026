@@ -27,7 +27,7 @@ class MarkerManager {
         this.currentData = [];
         this.tooltipEdgePadding = 20;
         this.tooltipApproxWidth = 300;
-        this.tooltipApproxHeight = 210;
+        this.tooltipApproxHeight = 320;
         this.tooltipCloseTimers = new WeakMap();
     }
 
@@ -123,23 +123,39 @@ class MarkerManager {
      * @private
      */
     createTooltipContent(flood) {
-        const naturaStatus = Number(flood.deaths_toll_int) === 1 ? 'Εντός Natura 2000' : 'Εκτός Natura 2000';
+        const isPriority = flood?.natura_flag === 'YES' || Number(flood?.deaths_toll_int) === 1;
+        const naturaStatus = isPriority ? 'Εντός Natura 2000' : 'Εκτός Natura 2000';
         const impact = flood.short_damage || flood.cause_of_flood;
-        const cause = impact ? escapeHtml(impact) : 'Μ/Δ';
+        const cause = impact ? escapeHtml(impact) : '';
         const location = escapeHtml(flood.location_name || 'Άγνωστη τοποθεσία');
-        const region = escapeHtml(flood.region_name || flood.flood_event_name || 'Μ/Δ');
-        const municipality = escapeHtml(flood.municipality || 'Μ/Δ');
         const eventDate = escapeHtml(flood.date_of_commencement || 'Μ/Δ');
-        const truncatedImpact = cause.length > 180 ? `${cause.slice(0, 180)}…` : cause;
+        const truncatedImpact = cause.length > 200 ? `${cause.slice(0, 200)}…` : cause;
+
+        const prefix = escapeHtml(flood.image_prefix || String(flood.id || ''));
+        const imgHtml = prefix ? `
+            <div class="tooltip-image-wrap">
+                <img class="tooltip-img"
+                     src="assets/images/${prefix}.jpg"
+                     alt="${location}"
+                     onerror="this.src='assets/images/${prefix}.png';this.onerror=function(){this.src='assets/images/${prefix}.webp';this.onerror=function(){this.closest('.tooltip-image-wrap').style.display='none';};};"
+                >
+            </div>` : '';
+
+        const naturaChip = isPriority
+            ? '<span class="tip-chip tip-chip--natura">Natura 2000</span>'
+            : '<span class="tip-chip">Εκτός Natura</span>';
 
         return `
             <div class="tooltip-content">
-                <div class="tooltip-title">${location}</div>
-                <div class="tooltip-meta"><span class="tooltip-label">Δήμος:</span> <strong>${municipality}</strong></div>
-                <div class="tooltip-meta"><span class="tooltip-label">Περιφέρεια:</span> <strong>${region}</strong></div>
-                <div class="tooltip-meta"><span class="tooltip-label">Ημερομηνία:</span> <strong>${eventDate}</strong></div>
-                <div class="tooltip-meta"><span class="tooltip-label">Natura:</span> <strong>${naturaStatus}</strong></div>
-                <div class="tooltip-impact"><span class="tooltip-label">Επιπτώσεις:</span> ${truncatedImpact}</div>
+                ${imgHtml}
+                <div class="tooltip-body">
+                    <div class="tooltip-title">${location}</div>
+                    <div class="tooltip-date-row">
+                        ${naturaChip}
+                        <span class="tooltip-date">${eventDate}</span>
+                    </div>
+                    ${truncatedImpact ? `<div class="tooltip-impact">${truncatedImpact}</div>` : ''}
+                </div>
             </div>
         `;
     }
